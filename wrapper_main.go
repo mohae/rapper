@@ -14,7 +14,7 @@ import (
 // usage is the usage func for flag.Usage.
 func usage() {
 	fmt.Fprint(os.Stderr, "Usage:\n")
-	fmt.Fprintf(os.Stderr, "  %s [FLAGS] path\n", app)
+	fmt.Fprintf(os.Stderr, "  %s [FLAGS] path(s)\n", app)
 	fmt.Fprint(os.Stderr, "\n")
 	fmt.Fprintf(os.Stderr, "%s takes a path and wraps its contents so that the lines are of a certain length.\n", app)
 	fmt.Fprint(os.Stderr, "  If the path is a file, the contents of that file will be wrapped and saved.\n")
@@ -33,7 +33,14 @@ func FlagParse() {
 
 	flag.Parse()
 
-	if cfg.LogFile != "" && cfg.LogFile != "stdout" { // open the logfile if one is specified
+	if flag.NArg() <= 0 {
+		fmt.Fprintf(os.Stderr, "%s: no paths specified, nothing to wrap\n", app)
+		fmt.Fprint(os.Stderr, "\n")
+		usage()
+		os.Exit(1)
+	}
+
+	if cfg.LogFile != "" && cfg.LogFile != "stderr" { // open the logfile if one is specified
 		cfg.f, err = os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0664)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s: open logfile: %s", app, err)
