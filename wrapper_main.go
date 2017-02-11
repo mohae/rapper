@@ -61,24 +61,31 @@ func wrapperMain(paths []string) int {
 		defer cfg.f.Close() // make sure the logfile is closed if there is one
 	}
 
+	var processed, updated int
 	// process the path
 	for _, p := range paths {
-		err := dir(p)
+		p, u, err := dir(p)
+		processed += p
+		updated += u
 		if err != nil {
+			doneMessage(processed, updated)
 			log.Printf("wrap %s: error: %s", p, err)
 			return 1
 		}
+
 	}
 
+	doneMessage(processed, updated)
 	return 0
 }
 
-func dir(p string) error {
+func dir(p string) (processed, updated int, err error) {
 	files, err := ioutil.ReadDir(p)
 	if err != nil {
-		return err
+		return processed, updated, err
 	}
 	for _, f := range files {
+		processed++
 		ext := filepath.Ext(f.Name())
 		if cfg.Include {
 			if !cfg.Ext.Exists(ext) {
@@ -93,22 +100,29 @@ func dir(p string) error {
 
 		b, err := ioutil.ReadFile(filepath.Join(p, f.Name()))
 		if err != nil {
-			return fmt.Errorf("read %s: %s", filepath.Join(p, f.Name()), err)
+			return processed, updated, fmt.Errorf("read %s: %s", filepath.Join(p, f.Name()), err)
 		}
 
 		// wrap the bytes
 		b, err = linewrap.Bytes(b)
 		if err != nil {
-			return fmt.Errorf("wrap %s: %s", filepath.Join(p, f.Name()), err)
+			return processed, updated, fmt.Errorf("wrap %s: %s", filepath.Join(p, f.Name()), err)
 		}
 
 		// write the bytes
 		err = ioutil.WriteFile(filepath.Join(p, f.Name()), b, f.Mode())
 		if err != nil {
-			return fmt.Errorf("write %s: %s", filepath.Join(p, f.Name()), err)
+			return processed, updated, fmt.Errorf("write %s: %s", filepath.Join(p, f.Name()), err)
 		}
-
+		updated++
 	}
 
-	return nil
+	return processed, updated, nil
+}
+
+func doneMessage(p, u int) {
+	s := p - u
+	fmt.Printf("%d files processed\n", p)
+	fmt.Printf("%d were skipped\n", s)
+	fmt.Printf("%d were updated\n", u)
 }
