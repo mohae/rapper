@@ -16,6 +16,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -28,16 +29,38 @@ var (
 
 type Config struct {
 	Length  int      // line length
-	Ext     string   // extension to filter on
+	Ext     Strings  // extension to filter on
 	Exclude bool     // exclude the specified extension
 	Include bool     // include the specified extension
 	LogFile string   // output destination for logs; stderr is default
 	f       *os.File // logfile handle for close; this will be nil if output is stderr
 }
 
+type Strings []string // a type to add support for string arrays to a flag arg
+
+// implement the flag.Value iinterface
+func (s *Strings) String() string {
+	return fmt.Sprintf("%s")
+}
+
+func (s *Strings) Set(value string) error {
+	*s = append(*s, value)
+	return nil
+}
+
+// Exists returns if the string is in the slice
+func (s *Strings) Exists(v string) bool {
+	for _, val := range *s {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}
+
 func init() {
 	flag.IntVar(&cfg.Length, "length", 80, "line length")
-	flag.StringVar(&cfg.Ext, "ext", "", "extension to filter on")
+	flag.Var(&cfg.Ext, "ext", "extension to filter on")
 	flag.BoolVar(&cfg.Exclude, "exclude", false, "exclude the extensions")
 	flag.BoolVar(&cfg.Include, "include", false, "include the extensions")
 	flag.StringVar(&cfg.LogFile, "logfile", "stderr", "output destination for logs")

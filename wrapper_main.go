@@ -80,11 +80,15 @@ func dir(p string) error {
 	}
 	for _, f := range files {
 		ext := filepath.Ext(f.Name())
-		if cfg.Include && ext != cfg.Ext {
-			continue
+		if cfg.Include {
+			if !cfg.Ext.Exists(ext) {
+				continue
+			}
 		}
-		if cfg.Exclude && ext == cfg.Ext {
-			continue
+		if cfg.Exclude {
+			if cfg.Ext.Exists(ext) {
+				continue
+			}
 		}
 
 		b, err := ioutil.ReadFile(filepath.Join(p, f.Name()))
