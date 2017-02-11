@@ -40,6 +40,11 @@ func FlagParse() {
 		os.Exit(1)
 	}
 
+	if cfg.Exclude && cfg.Include {
+		fmt.Fprintf(os.Stderr, "%s: include and exclude were both set to true; these are mutually exclusive flags", app)
+		os.Exit(1)
+	}
+
 	if cfg.LogFile != "" && cfg.LogFile != "stderr" { // open the logfile if one is specified
 		cfg.f, err = os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0664)
 		if err != nil {
@@ -73,8 +78,15 @@ func dir(p string) error {
 	if err != nil {
 		return err
 	}
-
 	for _, f := range files {
+		ext := filepath.Ext(f.Name())
+		if cfg.Include && ext != cfg.Ext {
+			continue
+		}
+		if cfg.Exclude && ext == cfg.Ext {
+			continue
+		}
+
 		b, err := ioutil.ReadFile(filepath.Join(p, f.Name()))
 		if err != nil {
 			return fmt.Errorf("read %s: %s", filepath.Join(p, f.Name()), err)

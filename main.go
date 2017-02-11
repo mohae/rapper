@@ -21,13 +21,16 @@ import (
 	"path/filepath"
 )
 
-var app = filepath.Base(os.Args[0]) // name of application
-var cfg Config
+var (
+	app = filepath.Base(os.Args[0]) // name of application
+	cfg Config
+)
 
 type Config struct {
 	Length  int      // line length
 	Ext     string   // extension to filter on
 	Exclude bool     // exclude the specified extension
+	Include bool     // include the specified extension
 	LogFile string   // output destination for logs; stderr is default
 	f       *os.File // logfile handle for close; this will be nil if output is stderr
 }
@@ -35,6 +38,8 @@ type Config struct {
 func init() {
 	flag.IntVar(&cfg.Length, "length", 80, "line length")
 	flag.StringVar(&cfg.Ext, "ext", "", "extension to filter on")
+	flag.BoolVar(&cfg.Exclude, "exclude", false, "exclude the extensions")
+	flag.BoolVar(&cfg.Include, "include", false, "include the extensions")
 	flag.StringVar(&cfg.LogFile, "logfile", "stderr", "output destination for logs")
 	log.SetPrefix(app + ": ")
 }
