@@ -89,11 +89,17 @@ func dir(p string) (processed, updated int, err error) {
 		ext := filepath.Ext(f.Name())
 		if cfg.Include {
 			if !cfg.Ext.Exists(ext) {
+				if cfg.Verbose {
+					fmt.Printf("file skipped:    %s\n", f.Name())
+				}
 				continue
 			}
 		}
 		if cfg.Exclude {
 			if cfg.Ext.Exists(ext) {
+				if cfg.Verbose {
+					fmt.Printf("file skipped:    %s\n", f.Name())
+				}
 				continue
 			}
 		}
@@ -115,6 +121,9 @@ func dir(p string) (processed, updated int, err error) {
 			return processed, updated, fmt.Errorf("write %s: %s", filepath.Join(p, f.Name()), err)
 		}
 		updated++
+		if cfg.Verbose {
+			fmt.Printf("file processed:  %s\n", f.Name())
+		}
 	}
 
 	return processed, updated, nil
@@ -122,6 +131,16 @@ func dir(p string) (processed, updated int, err error) {
 
 func doneMessage(p, u int) {
 	s := p - u
+
+	dash := make([]byte, 0, len(app)+21)
+	for i := 0; i < cap(dash); i++ {
+		dash = append(dash, '-')
+	}
+	if cfg.Verbose {
+		fmt.Print("\n")
+	}
+	fmt.Printf("%s: processing complete\n", app)
+	fmt.Printf("%s\n", string(dash))
 	fmt.Printf("%d files processed\n", p)
 	fmt.Printf("%d were skipped\n", s)
 	fmt.Printf("%d were updated\n", u)

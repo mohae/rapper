@@ -68,6 +68,7 @@ func init() {
 	flag.Var(&cfg.Ext, "ext", "extension to filter on")
 	flag.BoolVar(&cfg.Exclude, "exclude", false, "exclude the extensions")
 	flag.BoolVar(&cfg.Include, "include", false, "include the extensions")
+	flag.BoolVar(&cfg.Verbose, "v", false, "verbose output")
 	flag.StringVar(&cfg.LogFile, "logfile", "stderr", "output destination for logs")
 	log.SetPrefix(app + ": ")
 }
