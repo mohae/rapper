@@ -6,6 +6,8 @@ Lines lengths are a maximum of 80 characters unless the `length` flag is passed 
 
 Files can be filtered by file extension. The `ext` flag specifies the file extension. For multiple file extensions the `ext` flag should be repeated for each file extension. What should be done with the filtered file is determined by the `exclude` or `include` flag. If both `exclude` and `include` are _false_, nothing will be filtered; both cannot be true.
 
+An extension is the suffix of the last '.' in the filename. If the filename does not have a dot, like 'README', it will not have a extension.
+
 ## Use
 This assumes that you have Go installed and that you're `$GOPATH/bin` is in your path.
 
@@ -17,9 +19,9 @@ Run rapper with `verbose` output:
 
     $ rapper -v path/to/dir
 
-Run rapper; only wrap `.txt` and `.md` files. The extension does not have to include the `.`:
+Run rapper; only wrap `.txt` and `.stuff` files. The extension does not have to include the `.`:
 
-    $ rapper -include -ext .txt -ext md path/to/dir
+    $ rapper -include -ext .txt -ext stuff path/to/dir
 
 For usage output:
 
