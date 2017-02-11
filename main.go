@@ -20,6 +20,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -33,6 +34,7 @@ type Config struct {
 	Exclude bool     // exclude the specified extension
 	Include bool     // include the specified extension
 	LogFile string   // output destination for logs; stderr is default
+	Verbose bool     // verbose output
 	f       *os.File // logfile handle for close; this will be nil if output is stderr
 }
 
@@ -44,6 +46,9 @@ func (s *Strings) String() string {
 }
 
 func (s *Strings) Set(value string) error {
+	if !strings.HasPrefix(value, ".") {
+		value = "." + value
+	}
 	*s = append(*s, value)
 	return nil
 }
