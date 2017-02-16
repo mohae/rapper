@@ -55,8 +55,6 @@ func FlagParse() {
 }
 
 func wrapperMain(paths []string) int {
-	/// this combination ensures that wrapped lines have leading blanks elided
-	linewrap.LineComment(true, "")
 	if cfg.f != nil {
 		defer cfg.f.Close() // make sure the logfile is closed if there is one
 	}
@@ -110,7 +108,8 @@ func dir(p string) (processed, updated int, err error) {
 		}
 
 		// wrap the bytes
-		b, err = linewrap.Bytes(b)
+		w := linewrap.New()
+		b, err = w.Bytes(b)
 		if err != nil {
 			return processed, updated, fmt.Errorf("wrap %s: %s", filepath.Join(p, f.Name()), err)
 		}
