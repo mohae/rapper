@@ -41,14 +41,26 @@ func FlagParse() {
 	}
 
 	if cfg.Exclude && cfg.Include {
-		fmt.Fprintf(os.Stderr, "%s: include and exclude were both set to true; these are mutually exclusive flags", app)
+		fmt.Fprintf(os.Stderr, "%s: include and exclude flags were both set to true; these are mutually exclusive flags\n", app)
 		os.Exit(1)
+	}
+
+	if cfg.Comment != "" {
+		cfg.commentStyle = linewrap.StringAsCommentStyle(cfg.Comment)
+		if cfg.commentStyle == linewrap.NoComment {
+			fmt.Fprintf(os.Stderr, "%s: invalid comment style: %q\n", app, cfg.Comment)
+			os.Exit(1)
+		}
+	}
+
+	if cfg.Verbose && cfg.commentStyle != linewrap.NoComment {
+		fmt.Printf("%s: the files will be wrapped as %s\n", app, cfg.commentStyle)
 	}
 
 	if cfg.LogFile != "" && cfg.LogFile != "stderr" { // open the logfile if one is specified
 		cfg.f, err = os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0664)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: open logfile: %s", app, err)
+			fmt.Fprintf(os.Stderr, "%s: open logfile: %s\n", app, err)
 			os.Exit(1)
 		}
 	}
@@ -82,7 +94,12 @@ func dir(p string) (processed, updated int, err error) {
 	if err != nil {
 		return processed, updated, err
 	}
+	// wrap the bytes
+	w := linewrap.New()
+	w.CommentStyle = cfg.commentStyle
+
 	for _, f := range files {
+		w.Reset()
 		processed++
 		ext := filepath.Ext(f.Name())
 		if cfg.Include {
@@ -107,8 +124,6 @@ func dir(p string) (processed, updated int, err error) {
 			return processed, updated, fmt.Errorf("read %s: %s", filepath.Join(p, f.Name()), err)
 		}
 
-		// wrap the bytes
-		w := linewrap.New()
 		b, err = w.Bytes(b)
 		if err != nil {
 			return processed, updated, fmt.Errorf("wrap %s: %s", filepath.Join(p, f.Name()), err)

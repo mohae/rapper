@@ -21,6 +21,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/mohae/linewrap"
 )
 
 var (
@@ -29,13 +31,15 @@ var (
 )
 
 type Config struct {
-	Length  int      // line length
-	Ext     Strings  // extension to filter on
-	Exclude bool     // exclude the specified extension
-	Include bool     // include the specified extension
-	LogFile string   // output destination for logs; stderr is default
-	Verbose bool     // verbose output
-	f       *os.File // logfile handle for close; this will be nil if output is stderr
+	Length       int     // line length
+	Ext          Strings // extension to filter on
+	Exclude      bool    // exclude the specified extension
+	Include      bool    // include the specified extension
+	LogFile      string  // output destination for logs; stderr is default
+	Comment      string  // make the wrapped output a comment using the style specified
+	commentStyle linewrap.CommentStyle
+	Verbose      bool     // verbose output
+	f            *os.File // logfile handle for close; this will be nil if output is stderr
 }
 
 type Strings []string // a type to add support for string arrays to a flag arg
@@ -69,6 +73,7 @@ func init() {
 	flag.BoolVar(&cfg.Exclude, "exclude", false, "exclude the extensions")
 	flag.BoolVar(&cfg.Include, "include", false, "include the extensions")
 	flag.BoolVar(&cfg.Verbose, "v", false, "verbose output")
+	flag.StringVar(&cfg.Comment, "comment", "", "output the wrapped lines as comments; supported styles: cpp or c++, c, and shell or perl")
 	flag.StringVar(&cfg.LogFile, "logfile", "stderr", "output destination for logs")
 	log.SetPrefix(app + ": ")
 }
