@@ -46,7 +46,7 @@ func FlagParse() {
 	}
 
 	if cfg.Comment != "" {
-		cfg.commentStyle = linewrap.StringAsCommentStyle(cfg.Comment)
+		cfg.commentStyle = linewrap.ParseCommentStyle(cfg.Comment)
 		if cfg.commentStyle == linewrap.NoComment {
 			fmt.Fprintf(os.Stderr, "%s: invalid comment style: %q\n", app, cfg.Comment)
 			os.Exit(1)
